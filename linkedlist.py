@@ -5,10 +5,17 @@ from collections import Iterable
 from functools import total_ordering
 
 
+def index_check(length, index):
+    if index > length:
+        raise IndexError("list index out of range")
+    if index < 0:
+        raise ValueError("index must be positive")
+
+
 @total_ordering
 class SingleLinkNode:
     def __init__(self, value=None, next_node=None):
-        self.value = value
+        self._value = value
         self.next_node = next_node
 
     @property
@@ -55,7 +62,8 @@ class DoubleLinkNode(SingleLinkNode):
 
 class SingleLinkedList:
     """
-    A single linked list. All operations should be O(n) or O(1)
+    A single linked list. All operations should be O(n) or O(1). Utilizes
+    merge-sort, O(nlogn).
     """
     def __init__(self):
         self.head = SingleLinkNode()
@@ -80,7 +88,6 @@ class SingleLinkedList:
         index = 0
         while current_node != value:
             current_node = current_node.next_node
-            out_of_range(current_node)
             index += 1
         self.__delitem__(index)
 
@@ -143,44 +150,44 @@ class SingleLinkedList:
         return str(list(self))
 
     def __len__(self):
-        if self.head.value is None:
-            return 0
-        count = 1
+        count = 0
         current_node = self.head
-        while current_node.next_node is not None:
-            count += 1
+        if self.head.value is None:
+            return count
+        while current_node is not None:
             current_node = current_node.next_node
+            count += 1
         return count
 
     def __getitem__(self, index: int):
         current_node = self.head
+        index_check(len(self), index)
         while index:
             current_node = current_node.next_node
-            out_of_range(current_node)
             index -= 1
         return current_node
 
     def __setitem__(self, index: int, value: object):
         new_node = SingleLinkNode(value)
+        index_check(len(self), index)
         if self.head.value is None:
             self.head = new_node
         else:
             current_node = self.head
             while current_node.next_node and index-1:
                 current_node = current_node.next_node
-                out_of_range(current_node)
                 index -= 1
             new_node.next_node = current_node.next_node
             current_node.next_node = new_node
 
     def __delitem__(self, index: int):
+        index_check(len(self), index)
         if index == 0:
             self.head = self.head.next_node
         else:
             current_node = self.head
             while current_node.next_node and index-1:
                 current_node = current_node.next_node
-                out_of_range(current_node)
                 index -= 1
             current_node.next_node = current_node.next_node.next_node
 
@@ -203,7 +210,7 @@ class SingleLinkedList:
 
 class DoubleLinkedList:
     """
-    This a dounle linked list that maintains a head and a tail. All
+    This a double linked list that maintains a head and a tail. All
     operations are still O(n), just a fun experiment
     """
     def __init__(self):
@@ -306,33 +313,31 @@ class DoubleLinkedList:
     def __len__(self):
         count = 0
         current_node = self.head
-        while current_node:
+        if current_node.value is None:
+            return 0
+        while current_node is not None:
             current_node = current_node.next_node
             count += 1
         return count
 
     def __getitem__(self, index: int):
+        index_check(len(self),index)
         current_node = self.head
-        if index < 0:
-            raise ValueError("index must be positive")
-        if index > len(self):
-            raise IndexError("list index out of range")
-        else:
-            while index:
-                current_node = current_node.next_node
-                index -= 1
-            return current_node
+        while index:
+            current_node = current_node.next_node
+            index -= 1
+        return current_node
 
     def __setitem__(self, index: int, value: object):
         new_node = DoubleLinkNode(value)
-        if len(self) == 0:
-            self.head = new_node
         if index < 0:
             raise ValueError("index must be positive")
         if index > len(self):
             raise IndexError("list index out of range")
+        if index == 0:
+            new_node.next_node = self.head.next_node
+            self.head = new_node
         else:
-            print(self)
             current_node = self.head
             while current_node.next_node and index-1:
                 current_node = current_node.next_node
@@ -340,15 +345,14 @@ class DoubleLinkedList:
             new_node.next_node = current_node.next_node
             current_node.next_node = new_node
             new_node.previous = current_node
-            print(self)
 
     def __delitem__(self, index: int):
-        if index == 0:
-            self.head = self.head.next_node
         if index > len(self):
             raise IndexError("list index out of range")
         if index < 0:
             raise ValueError("index must be positive")
+        if index == 0:
+            self.head = self.head.next_node
         else:
             current_node = self.head
             while current_node.next_node and index:
@@ -371,6 +375,7 @@ class TestDoubleLinkedList(unittest.TestCase):
     def test_append(self):
         test_list = DoubleLinkedList()
         test_list.append("TEST")
+        test_list.append("Next")
         self.assertEqual("TEST", test_list[0])
 
     def test_extend(self):
