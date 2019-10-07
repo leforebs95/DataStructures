@@ -251,7 +251,6 @@ class DoubleLinkedList:
         A double linked list.
         Sort: O(nlogn)
         Insert: O(1) best O(n) worse
-
         """
         self.head = DoubleLinkNode()
 
@@ -385,57 +384,52 @@ class DoubleLinkedList:
             count += 1
         return count
 
-    def __getitem__(self, index: int):
-        if index >= len(self):
-            raise IndexError("list index out of range")
-        if index < 0:
-            index %= len(self)
+    def get_node(self, index):
+        i = 0
         current_node = self.head
-        while index:
+        while i < index:
             current_node = current_node.next_node
-            index -= 1
+            i += 1
         return current_node
 
-    def __setitem__(self, index: int, value: object):
-        new_node = DoubleLinkNode(value)
+    def out_of_range(self, index):
         if index >= len(self):
             raise IndexError("list index out of range")
+
+    def neg_index(self, index):
         if index < 0:
             index %= len(self)
+        return index
+
+    def __getitem__(self, index: int):
+        self.out_of_range(index)
+        index = self.neg_index(index)
+        return self.get_node(index)
+
+    def __setitem__(self, index: int, value: object):
+        self.out_of_range(index)
+        index = self.neg_index(index)
+        new_node = DoubleLinkNode(value)
+        current_node = self.get_node(index)
+        new_node.next_node = current_node.next_node
+        if current_node.next_node:
+            current_node.next_node.previous = new_node
+        new_node.previous = current_node.previous
+        if current_node.previous:
+            current_node.previous.next_node = new_node
         if index == 0:
-            new_node.next_node = self.head.next_node
             self.head = new_node
-        else:
-            i = 0
-            current_node = self.head
-            while i < index:
-                current_node = current_node.next_node
-                i += 1
-            next_item = current_node.next_node
-            previous_node = current_node.previous
-            new_node.next_node = next_item
-            new_node.previous = previous_node
-            if previous_node:
-                previous_node.next_node = new_node
-            if next_item:
-                next_item.previous = new_node
 
     def __delitem__(self, index: int):
-        if index < 0:
-            index %= len(self)
-        if index >= len(self):
-            raise IndexError("list index out of range")
-        if index == 0:
-            self.head = self.head.next_node
-        else:
-            i = 0
-            current_node = self.head
-            while i < index:
-                current_node = current_node.next_node
-                i += 1
+        self.out_of_range(index)
+        index = self.neg_index(index)
+        current_node = self.get_node(index)
+        if current_node.previous:
             current_node.previous.next_node = current_node.next_node
-            if current_node.next_node:
-                current_node.next_node.previous = current_node.previous
+        if current_node.next_node:
+            current_node.next_node.previous = current_node.previous
+        if index == 0:
+            self.head = current_node.next_node
 
     def __iter__(self):
         front_node = self.head
@@ -522,6 +516,8 @@ class TestDoubleLinkedList(unittest.TestCase):
         tst = DoubleLinkedList()
         tst.extend(range(5))
         tst[0] = 5
+        self.assertEqual(5, tst[1].previous)
+        self.assertEqual(5, tst[0])
         tst[3] = 0
 
     def test_del(self):
@@ -637,8 +633,6 @@ class TestLinkedList(unittest.TestCase):
         self.assertListEqual([0, 2, 3, 4], list(tst))
         del tst[-1]
         self.assertListEqual([0, 2, 3], list(tst))
-
-
 
 
 if __name__ == '__main__':
