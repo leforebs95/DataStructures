@@ -27,8 +27,29 @@ class TreeNode:
             return False
 
 
-class MinHeap:
+class MaxNodeHeap:
     def __init__(self):
+        self.root = TreeNode()
+
+    def __getitem__(self, item):
+        self.__getitem(self.root, item)
+
+    def __getitem(self, node, item):
+        if node == item:
+            return node
+        if node.left:
+            pass
+
+    def __setitem__(self, key, value):
+        pass
+
+
+class MinListHeap:
+    def __init__(self):
+        """
+        Min heap which uses a double linked list to maintain parent-children
+        relationships
+        """
         self.items = DoubleLinkedList()
 
     def __repr__(self):
@@ -36,8 +57,6 @@ class MinHeap:
 
     def __len__(self):
         return len(self.items)
-
-    # def __getitem__(self, item):
 
     @staticmethod
     def get_left_child_index(parent_index):
@@ -48,7 +67,7 @@ class MinHeap:
 
     @staticmethod
     def get_right_child_index(parent_index):
-        return 2*parent_index+2
+        return 2 * parent_index + 2
 
     def get_right_child(self, index):
         return self.items[self.get_right_child(index)]
@@ -70,8 +89,11 @@ class MinHeap:
         return self.get_parent_index(index) >= 0
 
     def swap(self, index_one, index_two):
-        (self.items[index_one], self.items[index_two]) = \
-         (self.items[index_two], self.items[index_one])
+        print(index_one, index_two)
+        temp = self.items[index_one]
+        print(temp, self.items[index_two])
+        self.items[index_one] = self.items[index_two]
+        self.items[index_two] = temp
 
     def peek(self):
         return self.items[0]
@@ -80,7 +102,6 @@ class MinHeap:
         item = self.items[0]
         self.items[0] = self.items[len(self) - 1]
         del self.items[len(self)-1]
-        print(self.items)
         self.heapify_down(0)
         return item
 
@@ -97,6 +118,7 @@ class MinHeap:
                 self.heapify_up(parent_index)
 
     def heapify_down(self, index):
+        print(list(self.preorder_traversal()))
         if self.has_left_child(index):
             small_child_index = self.get_left_child_index(index)
             if self.has_right_child(index):
@@ -155,26 +177,28 @@ class MinHeap:
 class TestMinHeap(unittest.TestCase):
 
     def test_peek(self):
-        test_min_heap = MinHeap()
+        test_min_heap = MinListHeap()
         for i in range(7):
             test_min_heap.add(i)
         self.assertEqual(test_min_heap.peek(), 0)
 
     def test_poll(self):
-        test_min_heap = MinHeap()
+        test_min_heap = MinListHeap()
         for i in range(7):
             test_min_heap.add(i)
+        # print(list(test_min_heap.preorder_traversal()))
         test_min_heap.poll()
         print(list(test_min_heap.preorder_traversal()))
+        # print(list(test_min_heap.preorder_traversal()))
 
     def test_add(self):
-        test_min_heap = MinHeap()
+        test_min_heap = MinListHeap()
         for i in range(7):
             test_min_heap.add(i)
         self.assertListEqual(list(test_min_heap), list(range(7)))
 
     def test_traversal(self):
-        test_min_heap = MinHeap()
+        test_min_heap = MinListHeap()
         for i in range(7):
             test_min_heap.add(i)
         self.assertListEqual(list(test_min_heap.preorder_traversal()),
