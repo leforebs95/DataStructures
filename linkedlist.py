@@ -8,8 +8,6 @@ from functools import total_ordering
 def index_check(length, index):
     if index > length:
         raise IndexError("list index out of range")
-    if index < 0:
-        raise ValueError("index must be positive")
 
 
 @total_ordering
@@ -69,14 +67,37 @@ class SingleLinkedList:
         self.head = SingleLinkNode()
 
     def append(self, value: object):
-        self.__setitem__(len(self), value)
+        new_node = DoubleLinkNode(value)
+        if len(self) == 0:
+            self.head = new_node
+        else:
+            index = 0
+            current_node = self.head
+            while index < len(self)-1:
+                current_node = current_node.next_node
+                index += 1
+            new_node.next_node = current_node.next_node
+            current_node.next_node = new_node
 
     def extend(self, items: Iterable):
         for item in items:
             self.append(item)
 
     def insert(self, index: int, value: object):
-        self.__setitem__(index, value)
+        new_node = SingleLinkNode(value)
+        index_check(len(self), index)
+        if index == 0:
+            new_node.next_node = self.head.next_node
+            self.head = new_node
+        if index < 0:
+            index %= len(self)
+        else:
+            current_node = self.head
+            while index > 1:
+                current_node = current_node.next_node
+                index -= 1
+            new_node.next_node = current_node.next_node
+            current_node.next_node = new_node
 
     def pop(self, index: int=0):
         item = self.__getitem__(index)
@@ -151,8 +172,10 @@ class SingleLinkedList:
 
     def __len__(self):
         count = 0
+        if self.head is None:
+            return count
         current_node = self.head
-        if self.head.value is None:
+        if current_node.value is None:
             return count
         while current_node is not None:
             current_node = current_node.next_node
@@ -160,35 +183,49 @@ class SingleLinkedList:
         return count
 
     def __getitem__(self, index: int):
+        if index >= len(self):
+            raise IndexError("list index out of range")
+        if index < 0:
+            index %= len(self)
         current_node = self.head
-        index_check(len(self), index)
         while index:
             current_node = current_node.next_node
             index -= 1
+
         return current_node
 
     def __setitem__(self, index: int, value: object):
         new_node = SingleLinkNode(value)
-        index_check(len(self), index)
-        if self.head.value is None:
+        if index >= len(self):
+            raise IndexError("list index out of range")
+        if index < 0:
+            index %= len(self)
+        if index == 0:
+            new_node.next_node = self.head.next_node
             self.head = new_node
         else:
+            i = 0
             current_node = self.head
-            while current_node.next_node and index-1:
+            while i < index:
                 current_node = current_node.next_node
-                index -= 1
+                i += 1
             new_node.next_node = current_node.next_node
-            current_node.next_node = new_node
+            if current_node.next_node:
+                current_node.next_node.previous = new_node
 
     def __delitem__(self, index: int):
-        index_check(len(self), index)
+        if index < 0:
+            index %= len(self)
+        if index >= len(self):
+            raise IndexError("list index out of range")
         if index == 0:
             self.head = self.head.next_node
         else:
+            i = 0
             current_node = self.head
-            while current_node.next_node and index-1:
+            while i < index-1:
                 current_node = current_node.next_node
-                index -= 1
+                i += 1
             current_node.next_node = current_node.next_node.next_node
 
     def __reversed__(self):
@@ -209,26 +246,52 @@ class SingleLinkedList:
 
 
 class DoubleLinkedList:
-    """
-    This a double linked list that maintains a head and a tail. All
-    operations are still O(n), just a fun experiment
-    """
     def __init__(self):
+        """
+        A double linked list.
+        Sort: O(nlogn)
+        Insert: O(1) best O(n) worse
+
+        """
         self.head = DoubleLinkNode()
 
     def append(self, value: object):
-        self.__setitem__(len(self), value)
+        new_node = DoubleLinkNode(value)
+        if len(self) == 0:
+            self.head = new_node
+        else:
+            index = 0
+            current_node = self.head
+            while index < len(self)-1:
+                current_node = current_node.next_node
+                index += 1
+            new_node.next_node = current_node.next_node
+            new_node.previous = current_node
+            current_node.next_node = new_node
 
     def extend(self, items: Iterable):
         for item in items:
             self.append(item)
 
     def insert(self, index: int, value: object):
-        self.__setitem__(index, value)
+        new_node = DoubleLinkNode(value)
+        index_check(len(self), index)
+        if index == 0:
+            new_node.next_node = self.head.next_node
+            self.head = new_node
+        if index < 0:
+            index %= len(self)
+        else:
+            current_node = self.head
+            while index > 1:
+                current_node = current_node.next_node
+                index -= 1
+            new_node.next_node = current_node.next_node
+            new_node.previous = current_node
+            current_node.next_node = new_node
 
     def pop(self, index: int=0):
         value = self.__getitem__(index)
-        print("GOT: {}".format(value))
         self.__delitem__(index)
         return value
 
@@ -312,16 +375,21 @@ class DoubleLinkedList:
 
     def __len__(self):
         count = 0
+        if self.head is None:
+            return count
         current_node = self.head
         if current_node.value is None:
-            return 0
+            return count
         while current_node is not None:
             current_node = current_node.next_node
             count += 1
         return count
 
     def __getitem__(self, index: int):
-        index_check(len(self),index)
+        if index >= len(self):
+            raise IndexError("list index out of range")
+        if index < 0:
+            index %= len(self)
         current_node = self.head
         while index:
             current_node = current_node.next_node
@@ -330,38 +398,44 @@ class DoubleLinkedList:
 
     def __setitem__(self, index: int, value: object):
         new_node = DoubleLinkNode(value)
-        if index < 0:
-            raise ValueError("index must be positive")
-        if index > len(self):
+        if index >= len(self):
             raise IndexError("list index out of range")
+        if index < 0:
+            index %= len(self)
         if index == 0:
             new_node.next_node = self.head.next_node
             self.head = new_node
         else:
+            i = 0
             current_node = self.head
-            while current_node.next_node and index-1:
+            while i < index:
                 current_node = current_node.next_node
-                index -= 1
-            new_node.next_node = current_node.next_node
-            current_node.next_node = new_node
-            new_node.previous = current_node
+                i += 1
+            next_item = current_node.next_node
+            previous_node = current_node.previous
+            new_node.next_node = next_item
+            new_node.previous = previous_node
+            if previous_node:
+                previous_node.next_node = new_node
+            if next_item:
+                next_item.previous = new_node
 
     def __delitem__(self, index: int):
-        if index > len(self):
-            raise IndexError("list index out of range")
         if index < 0:
-            raise ValueError("index must be positive")
+            index %= len(self)
+        if index >= len(self):
+            raise IndexError("list index out of range")
         if index == 0:
             self.head = self.head.next_node
         else:
+            i = 0
             current_node = self.head
-            while current_node.next_node and index:
+            while i < index:
                 current_node = current_node.next_node
-                index -= 1
+                i += 1
+            current_node.previous.next_node = current_node.next_node
             if current_node.next_node:
-                current_node.previous.next_node = current_node.next_node
-            else:
-                current_node.previous.next_node = None
+                current_node.next_node.previous = current_node.previous
 
     def __iter__(self):
         front_node = self.head
@@ -433,6 +507,38 @@ class TestDoubleLinkedList(unittest.TestCase):
         self.assertListEqual([3, 2, 1, 0], list(test_even_list))
         self.assertListEqual([4, 3, 2, 1, 0], list(test_odd_list))
 
+    def test_get(self):
+        tst = DoubleLinkedList()
+        with self.assertRaises(IndexError) as cm:
+            tst[0]
+        index_except = cm.exception
+        self.assertEqual(IndexError, type(index_except))
+        tst.extend(range(5))
+        self.assertEqual(0, tst[0])
+        self.assertEqual(1, tst[1])
+        self.assertEqual(3, tst[3])
+
+    def test_set(self):
+        tst = DoubleLinkedList()
+        tst.extend(range(5))
+        tst[0] = 5
+        tst[3] = 0
+
+    def test_del(self):
+        tst = DoubleLinkedList()
+        with self.assertRaises(IndexError) as cm:
+            tst[0]
+        index_except = cm.exception
+        self.assertEqual(IndexError, type(index_except))
+        tst.append(0)
+        del tst[0]
+        self.assertEqual(0, len(tst))
+        tst.extend(range(5))
+        del tst[1]
+        self.assertListEqual([0, 2, 3, 4], list(tst))
+        del tst[-1]
+        self.assertListEqual([0, 2, 3], list(tst))
+
 
 class TestLinkedList(unittest.TestCase):
 
@@ -503,6 +609,36 @@ class TestLinkedList(unittest.TestCase):
         [test_list.append(i) for i in range(5)]
         test_list.insert(2, "string")
         self.assertEqual("string", test_list[2])
+
+    def test_get(self):
+        tst = SingleLinkedList()
+        with self.assertRaises(IndexError) as cm:
+            tst[0]
+        index_except = cm.exception
+        self.assertEqual(IndexError, type(index_except))
+        tst.extend(range(5))
+        self.assertEqual(0, tst[0])
+        self.assertEqual(1, tst[1])
+        self.assertEqual(3, tst[3])
+
+    def test_set(self):
+        tst = SingleLinkedList()
+        tst.extend(range(5))
+        tst[0] = 5
+        tst[3] = 0
+
+    def test_del(self):
+        tst = SingleLinkedList()
+        tst.append(0)
+        del tst[0]
+        self.assertEqual(0, len(tst))
+        tst.extend(range(5))
+        del tst[1]
+        self.assertListEqual([0, 2, 3, 4], list(tst))
+        del tst[-1]
+        self.assertListEqual([0, 2, 3], list(tst))
+
+
 
 
 if __name__ == '__main__':
