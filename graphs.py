@@ -89,11 +89,8 @@ class MinListHeap:
         return self.get_parent_index(index) >= 0
 
     def swap(self, index_one, index_two):
-        print(index_one, index_two)
-        temp = self.items[index_one]
-        print(temp, self.items[index_two])
-        self.items[index_one] = self.items[index_two]
-        self.items[index_two] = temp
+        self.items[index_one], self.items[index_two] = \
+            self.items[index_two], self.items[index_one]
 
     def peek(self):
         return self.items[0]
@@ -118,7 +115,6 @@ class MinListHeap:
                 self.heapify_up(parent_index)
 
     def heapify_down(self, index):
-        print(list(self.preorder_traversal()))
         if self.has_left_child(index):
             small_child_index = self.get_left_child_index(index)
             if self.has_right_child(index):
@@ -186,10 +182,12 @@ class TestMinHeap(unittest.TestCase):
         test_min_heap = MinListHeap()
         for i in range(7):
             test_min_heap.add(i)
-        # print(list(test_min_heap.preorder_traversal()))
         test_min_heap.poll()
-        print(list(test_min_heap.preorder_traversal()))
-        # print(list(test_min_heap.preorder_traversal()))
+        self.assertListEqual(list(test_min_heap.preorder_traversal()),
+                             [1, 3, 6, 4, 2, 5])
+        test_min_heap.poll()
+        self.assertListEqual(list(test_min_heap.preorder_traversal()),
+                             [2, 3, 6, 4, 5])
 
     def test_add(self):
         test_min_heap = MinListHeap()
