@@ -407,10 +407,8 @@ class DoubleLinkedList:
         return self.get_node(index)
 
     def __setitem__(self, index: int, value: object):
-        self.out_of_range(index)
-        index = self.neg_index(index)
+        current_node = self.__getitem__(index)
         new_node = DoubleLinkNode(value)
-        current_node = self.get_node(index)
         new_node.next_node = current_node.next_node
         if current_node.next_node:
             current_node.next_node.previous = new_node
@@ -421,9 +419,7 @@ class DoubleLinkedList:
             self.head = new_node
 
     def __delitem__(self, index: int):
-        self.out_of_range(index)
-        index = self.neg_index(index)
-        current_node = self.get_node(index)
+        current_node = self.__getitem__(index)
         if current_node.previous:
             current_node.previous.next_node = current_node.next_node
         if current_node.next_node:
