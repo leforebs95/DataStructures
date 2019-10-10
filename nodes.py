@@ -52,6 +52,7 @@ class DoubleLinkNode(SingleLinkNode):
 class TreeNode:
     def __init__(self, value: object=None):
         self.value = value
+        self.parent = None
         self.left = None
         self.right = None
 
