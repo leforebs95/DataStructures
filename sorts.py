@@ -81,4 +81,24 @@ def merge_sort(unsorted_list: list) -> list:
     return merge(sort_left, sort_right)
 
 
+def insertion_sort(unsorted_list):
+    """
+
+    :param unsorted_list:
+    :return:
+    >>> insertion_sort(random.sample(range(10), 10))
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    """
+    i = 1
+    while i < len(unsorted_list):
+        j = i
+        while j > 0:
+            if unsorted_list[j-1] > unsorted_list[j]:
+                unsorted_list[j - 1], unsorted_list[j] = unsorted_list[j], \
+                                                         unsorted_list[j - 1]
+            else:
+                break
+            j -= 1
+        i += 1
+    return unsorted_list
 
