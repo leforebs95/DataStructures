@@ -1,4 +1,6 @@
+import random
 import unittest
+from collections import deque
 
 from DataStructures.nodes import TreeNode
 
@@ -6,42 +8,59 @@ from DataStructures.nodes import TreeNode
 class MaxNodeHeap:
     def __init__(self):
         self.root = TreeNode()
+        self.size = 0
 
     def add(self, value):
+        new_node = TreeNode(value)
         if self.root.value is None:
-            self.root = TreeNode(value)
+            self.root = new_node
         else:
-            self._add(self.root, value)
+            bit = deque(format(self.size+1, 'b'))
+            bit.popleft()
+            node = self.get_last(self.root, bit)
+            if node.left is None:
+                node.left = new_node
+                new_node.parent = node
+                self.heapify_up(new_node)
+            else:
+                node.right = new_node
+                new_node.parent = node
+                self.heapify_up(new_node)
+        self.size += 1
 
-    def _add(self, node, value):
-        if node.left is None:
-            node.left = TreeNode(value)
-            node.left.parent = node
-            self.heapify_up(node.left)
-        elif node.right is None:
-            node.right = TreeNode(value)
-            node.right.parent = node
-            self.heapify_up(node.right)
-        else:
-            self._add(node.left, value)
+    def get_last(self, node, bit):
+        if len(bit) == 0:
+            return node
+        digit = int(bit.popleft())
+        if digit == 1 and node.right is not None:
+            node = self.get_last(node.right, bit)
+        elif digit == 0 and node.left is not None:
+            node = self.get_last(node.left, bit)
+        return node
+
+    def __len__(self):
+        return self.size
 
     def peek(self):
         return self.root
 
     def poll(self):
         max_val = self.root.value
-        last_node = self.get_last(self.root)
-        self.root.value = last_node.value
+        bit = deque(format(self.size, 'b'))
+        bit.popleft()
+        last_node = self.get_last(self.root, bit)
+        if last_node.parent is None:
+            return max_val
+        parent = last_node.parent
+        if parent.left is last_node:
+            self.swap(self.root, last_node)
+            parent.left = None
+        elif parent.right is last_node:
+            self.swap(self.root, last_node)
+            parent.right = None
         self.heapify_down(self.root)
+        self.size -= 1
         return max_val
-
-    def get_last(self, node):
-        if node.right is not None:
-            self.get_last(node.right)
-        elif node.left is not None:
-            self.get_last(node.left)
-        else:
-            return node
 
     def swap(self, node1, node2):
         node1.value, node2.value = node2.value, node1.value
@@ -61,44 +80,44 @@ class MaxNodeHeap:
 
             if node < larger_val:
                 self.swap(node, larger_val)
-                self.heapify_down(larger_val)
+                self.heapify_down(node)
 
     def __iter__(self):
-        return iter(self._inorder_traversal(self.root))
+        return iter(self.preorder_traversal(self.root))
 
-    def _inorder_traversal(self, node):
+    def preorder_traversal(self, node):
         if node is not None:
-            if node.left:
-                yield from self._inorder_traversal(node.left)
             yield node
-            if node.right:
-                yield from self._inorder_traversal(node.right)
+            if node.left is not None:
+                yield from self.preorder_traversal(node.left)
+            if node.right is not None:
+                yield from self.preorder_traversal(node.right)
 
 
 class TestMaxNodeHeap(unittest.TestCase):
 
     def test_peek(self):
         test_min_heap = MaxNodeHeap()
-        for i in range(7):
+        for i in random.sample(range(7), 7):
             test_min_heap.add(i)
         self.assertEqual(test_min_heap.peek(), 6)
 
     def test_poll(self):
         test_min_heap = MaxNodeHeap()
-        for i in range(7):
+        for i in random.sample(range(7), 7):
             test_min_heap.add(i)
-        test_min_heap.poll()
-        self.assertListEqual(list(test_min_heap),
-                             [1, 3, 6, 4, 2, 5])
-        test_min_heap.poll()
-        self.assertListEqual(list(test_min_heap),
-                             [2, 3, 6, 4, 5])
+        self.assertEqual(test_min_heap.poll(), 6)
+        self.assertEqual(test_min_heap.poll(), 5)
+        self.assertEqual(test_min_heap.poll(), 4)
+        self.assertEqual(test_min_heap.poll(), 3)
+        self.assertEqual(test_min_heap.poll(), 2)
+        self.assertEqual(test_min_heap.poll(), 1)
+        self.assertEqual(test_min_heap.poll(), 0)
 
     def test_add(self):
         test_min_heap = MaxNodeHeap()
         for i in range(7):
             test_min_heap.add(i)
-        print(list(test_min_heap))
-        self.assertListEqual(list(test_min_heap), list(range(7)))
+        self.assertListEqual(list(test_min_heap), [6, 3, 0, 2, 5, 1, 4])
 
 
