@@ -1,6 +1,7 @@
 import unittest
+from typing import Iterable
+
 from DataStructures.doublelinkedlist import DoubleLinkedList
-# from DataStructures.singlelinkedlist import SingleLinkedList
 
 
 class MinListHeap:
@@ -52,9 +53,17 @@ class MinListHeap:
             self.items[index_two], self.items[index_one]
 
     def peek(self):
+        """
+        Returns the smallest item from tree
+        :return: Smallest value in tree
+        """
         return self.items[0]
 
     def poll(self):
+        """
+        Removes the smallest item from tree
+        :return: Smallest value in tree
+        """
         item = self.items[0]
         self.items[0] = self.items[len(self) - 1]
         del self.items[len(self)-1]
@@ -62,10 +71,20 @@ class MinListHeap:
         return item
 
     def add(self, item):
+        """
+        Add an item to the tree
+        :param item: Item to be added
+        :return:
+        """
         self.items.append(item)
         self.heapify_up(len(self)-1)
 
     def heapify_up(self, index):
+        """
+        Move a node up the tree as long as it is less than parent
+        :param index: Index of node to heapify up
+        :return:
+        """
         if self.has_parent(index):
             parent = self.get_parent(index)
             if parent > self.items[index]:
@@ -74,6 +93,11 @@ class MinListHeap:
                 self.heapify_up(parent_index)
 
     def heapify_down(self, index):
+        """
+        Move a node down the tree as long as it is greater than children
+        :param index: Index of node to heapify down
+        :return:
+        """
         if self.has_left_child(index):
             small_child_index = self.get_left_child_index(index)
             if self.has_right_child(index):
@@ -89,7 +113,11 @@ class MinListHeap:
     def __iter__(self):
         return iter(self.items)
 
-    def preorder_traversal(self):
+    def preorder_traversal(self) -> Iterable:
+        """
+        Travers the parent, the left children, then the right children
+        :return: Iterable of pre order Tree
+        """
         return iter(self._preorder_traversal(0))
 
     def _preorder_traversal(self, index):
@@ -102,7 +130,11 @@ class MinListHeap:
                 yield from self._preorder_traversal(self.get_right_child_index(
                     index))
 
-    def inorder_traversal(self):
+    def inorder_traversal(self)-> Iterable:
+        """
+        Traverse the left children, the parent, then the right chilren
+        :return: Iterable of in order Tree
+        """
         return iter(self._inorder_traversal(0))
 
     def _inorder_traversal(self, index):
@@ -115,7 +147,11 @@ class MinListHeap:
                 yield from self._inorder_traversal(
                     self.get_right_child_index(index))
 
-    def postorder_traversal(self):
+    def postorder_traversal(self)-> Iterable:
+        """
+        Travers the left children, then the right children, then the parent
+        :return: Iterable of post order Tree
+        """
         return iter(self._postorder_traversal(0))
 
     def _postorder_traversal(self, index):
