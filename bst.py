@@ -6,6 +6,9 @@ from DataStructures.nodes import TreeNode
 
 class BinaryTree:
     def __init__(self):
+        """
+        A Binary Search Tree implemented with nodes
+        """
         self.root = TreeNode()
 
     def insert(self, value):
@@ -67,7 +70,6 @@ class TestBinaryTree(unittest.TestCase):
         for i in random.sample(range(1, 100000), 9999):
             test_tree.insert(i)
         seek = test_tree.find(666)
-        print(seek)
         if seek:
             self.assertEqual(seek, 666)
         else:

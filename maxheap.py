@@ -7,6 +7,9 @@ from DataStructures.nodes import TreeNode
 
 class MaxNodeHeap:
     def __init__(self):
+        """
+        Max Heap implemented with nodes/pointers
+        """
         self.root = TreeNode()
         self.size = 0
 
