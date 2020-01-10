@@ -102,3 +102,7 @@ def insertion_sort(unsorted_list):
         i += 1
     return unsorted_list
 
+
+def quick_sort(unsorted_list):
+
+
